@@ -4,6 +4,8 @@ from .cron import cron_check
 from .discovery import discover_home
 from .logs import logs_check
 from .memory import memory_check
+from .mcp import mcp_check
+from .plugins import plugins_check
 from .profiles import profile_inventory_check
 from .skills import skills_check
 
@@ -19,7 +21,9 @@ __all__ = [
     "discover_home",
     "logs_check",
     "memory_check",
+    "mcp_check",
     "profile_config_check",
     "profile_inventory_check",
+    "plugins_check",
     "skills_check",
 ]

@@ -36,8 +36,8 @@ hsd full --profile work
 - Cron checks: metadata parse, enabled/paused counts, missing script/workdir references.
 - Memory checks: provider presence, file/DB metadata, size pressure; no raw memory dump by default.
 - Skills checks: count, duplicate names, frontmatter, missing linked files, huge files.
-- Plugins checks: enabled/installed manifests and missing command/env presence by name only.
-- MCP checks: configured servers, command/url shape, missing executable/env names; reachability only with explicit network flag later.
+- Plugins checks: enabled/configured plugin names, local plugin directories, recognized manifest presence/parseability, symlink skips, and inline-sensitive metadata detection. Implemented as read-only inventory; no plugin code execution.
+- MCP checks: configured servers, command/url shape, missing executable/env/header names; no server connection or tool execution by default.
 - Logs checks: capped, redacted category matching.
 - Post-update drift: version/source drift, stale process hints, import errors after update, config compatibility warnings.
 - JSON + Markdown reports.

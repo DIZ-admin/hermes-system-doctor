@@ -17,7 +17,7 @@ TOKEN_SHAPE = (
 SECRET_PATTERNS = [
     re.compile(r"(?i)(api[_-]?key|token|secret|password|passwd|authorization)\s*[:=]\s*[^\s]+"),
     re.compile(TOKEN_SHAPE),
-    re.compile(r"\b\d{8,12}:[A-Za-z0-9_\-]{20,}\b"),  # Telegram bot token shape
+    re.compile(r"\b\d{8,12}:[A-Za-z0-9_\-]{20,}\b"),  # messaging bot token shape
     re.compile(r"(?i)(refresh_token|access_token|id_token)\s*[:=]\s*[^\s,}\]]+"),
 ]
 CHAT_ID_PATTERN = re.compile(r"(?<!\w)-?100\d{8,16}(?!\w)")

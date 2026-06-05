@@ -11,6 +11,8 @@ from .checks import (
     discover_home,
     logs_check,
     memory_check,
+    mcp_check,
+    plugins_check,
     profile_inventory_check,
     skills_check,
 )
@@ -31,6 +33,8 @@ def build_report(mode: str, hermes_home: Path) -> DoctorReport:
                 auth_surface_check(hermes_home),
                 memory_check(hermes_home),
                 skills_check(hermes_home),
+                plugins_check(hermes_home),
+                mcp_check(hermes_home),
             ]
         )
     return DoctorReport.build(mode=mode, hermes_home=safe_home_label(hermes_home), checks=checks)

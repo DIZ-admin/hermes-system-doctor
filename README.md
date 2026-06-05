@@ -17,14 +17,14 @@ Early read-only preview. Current implementation covers the first core slice only
 - auth/secret-adjacent file presence inventory without reading payloads;
 - memory surface inventory without dumping memory content;
 - skills integrity checks without dumping skill bodies;
+- plugins inventory without executing plugin code;
+- MCP server config checks without connecting to servers or running tools;
 - safe JSON/Markdown reports;
 - redaction tests and read-only tests.
 
 Planned but not implemented yet:
 
 - gateway checks;
-- plugins checks;
-- MCP checks;
 - post-update drift checks;
 - repair planning / gated fix mode.
 
@@ -75,6 +75,8 @@ Default mode is read-only and offline:
 - no config writes;
 - no gateway restart;
 - no cron execution;
+- no plugin execution;
+- no MCP tool execution;
 - no platform messages;
 - no network probes;
 - no raw secrets in reports.
