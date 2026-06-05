@@ -2,6 +2,8 @@
 
 Diagnostics and approval-gated repair planning for [Hermes Agent](https://github.com/NousResearch/hermes-agent) installations.
 
+![Hermes Agent System Doctor hero: a calm on-duty system doctor for local Hermes runtime diagnostics and approval-gated repair planning.](docs/assets/hermes-system-doctor-hero.jpg)
+
 Stock `hermes doctor` checks the base install. **Hermes Agent System Doctor** maps the wider local Hermes system — profiles, gateway signals, cron metadata, logs, auth surfaces, memory, skills, plugins, MCP, and local post-update drift — then separates **fact**, **risk**, **unknown**, and **approval-required repair**.
 
 It is built for operators who want proof before touching a live agent runtime.
