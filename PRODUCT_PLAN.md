@@ -2,7 +2,7 @@
 
 ## Verdict
 
-Build as a standalone read-only companion CLI for Hermes Agent installations.
+Build as a standalone diagnostics and approval-gated repair companion CLI for Hermes Agent installations.
 
 The differentiator is not “another doctor command”. It is **discovery-first system mapping** across profiles, gateway, cron, memory, skills, plugins, MCP, logs, and post-update drift.
 
@@ -18,7 +18,7 @@ hermes-system-doctor quick
 hermes-system-doctor full
 hermes-system-doctor post-update
 hermes-system-doctor repair-plan --input report.json --output repair-plan.json
-hermes-system-doctor fix --plan repair-plan.json --approve rp-0001 --output fix-preview.json
+hermes-system-doctor fix --hermes-home ~/.hermes --plan repair-plan.json --approve rp-0001 --output fix-preview.json
 ```
 
 Alias:
@@ -43,13 +43,13 @@ hsd full --profile work
 - Post-update drift: local source-ref drift, stale process hints, import/update/version signals from capped logs; no network fetch or dependency imports by default.
 - JSON + Markdown reports.
 - Dry-run repair-plan generation from reports; no autofix.
-- Gated fix preview skeleton: validates `--approve action-id`, renders backup/diff/rollback intent, and blocks execution until a registered safe executor exists.
+- Gated fix mode: validates `--approve action-id`, renders backup/diff/rollback intent, blocks unregistered repairs, and includes one narrow executor for `config.missing` that creates a minimal parseable `config.yaml` stub after writing a backup manifest.
 
 ## Non-goals for MVP
 
-- No autofix.
-- No registered mutating fix executors until backup creation, diff preview, rollback, and action-specific tests are proven.
-- No writes except explicit `--output` report path.
+- No broad autofix.
+- No registered mutating fix executors beyond the explicit `config.missing` stub creator until backup creation, diff preview, rollback, and action-specific tests are proven.
+- No writes except explicit `--output` report path and approved registered executor artifacts under the selected Hermes home.
 - No service restart.
 - No cron execution.
 - No OAuth login.

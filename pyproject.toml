@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hermes-system-doctor"
 version = "0.1.0"
-description = "Read-only system diagnostics for Hermes Agent installations."
+description = "Diagnostics and approval-gated repair planning for Hermes Agent installations."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "MIT"

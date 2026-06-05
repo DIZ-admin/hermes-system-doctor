@@ -55,7 +55,7 @@ def build_report(mode: str, hermes_home: Path) -> DoctorReport:
 def parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="hermes-system-doctor")
     p.add_argument("command", choices=["discover", "quick", "full", "post-update", "repair-plan", "fix", "version"])
-    p.add_argument("--hermes-home", default="~/.hermes")
+    p.add_argument("--hermes-home", default=None, help="Hermes home to inspect; required for registered fix executors")
     p.add_argument(
         "--all-profiles",
         action="store_true",
@@ -67,7 +67,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--input", help="Input JSON report for repair-plan mode")
     p.add_argument("--plan", help="Input repair-plan JSON for fix preview mode")
     p.add_argument("--approve", help="Approved repair-plan action id for fix preview mode")
-    p.add_argument("--execute", action="store_true", help="Request execution; currently blocked until a safe executor exists")
+    p.add_argument("--execute", action="store_true", help="Apply a registered approved fix executor; blocked for unregistered actions")
     p.add_argument("--fail-on", choices=["unknown", "warn", "fail", "needs-approval"], default=None)
     return p
 
@@ -93,7 +93,12 @@ def main(argv: list[str] | None = None) -> int:
         if not args.approve:
             parser().error("fix requires --approve action-id")
         try:
-            preview = build_fix_preview(load_repair_plan(Path(args.plan)), args.approve, execute=args.execute)
+            preview = build_fix_preview(
+                load_repair_plan(Path(args.plan)),
+                args.approve,
+                hermes_home=Path(args.hermes_home).expanduser() if args.hermes_home else None,
+                execute=args.execute,
+            )
         except (OSError, ValueError) as exc:
             parser().error(f"fix failed: {exc}")
         rendered = fix_preview_to_markdown(preview) if args.markdown else fix_preview_to_json(preview)
@@ -104,7 +109,7 @@ def main(argv: list[str] | None = None) -> int:
         if preview.status.startswith("BLOCKED"):
             return 2 if args.execute else 1
         return 0
-    report = build_report(args.command, Path(args.hermes_home).expanduser())
+    report = build_report(args.command, Path(args.hermes_home or "~/.hermes").expanduser())
     rendered = to_json(report) if args.json else to_markdown(report)
     if args.output:
         Path(args.output).write_text(rendered, encoding="utf-8")

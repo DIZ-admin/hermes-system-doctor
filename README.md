@@ -1,12 +1,12 @@
 # Hermes Agent System Doctor
 
-Read-only diagnostics for [Hermes Agent](https://github.com/NousResearch/hermes-agent) installations.
+Diagnostics and approval-gated repair planning for [Hermes Agent](https://github.com/NousResearch/hermes-agent) installations.
 
 Hermes Agent System Doctor is being built as a discovery-first companion to the stock `hermes doctor`. Stock `hermes doctor` checks the base install; this tool is meant to map the wider local Hermes system and separate **fact**, **risk**, **unknown**, and **approval-required repair**.
 
 ## Status
 
-Early read-only preview. Current implementation covers the first core slice only:
+Early safety-first preview. Diagnostic modes are read-only; `fix --execute` is approval-gated and limited to registered narrow executors. Current implementation covers:
 
 - Hermes home discovery;
 - root + named profile inventory;
@@ -22,13 +22,13 @@ Early read-only preview. Current implementation covers the first core slice only
 - MCP server config checks without connecting to servers or running tools;
 - post-update drift signals from local logs and local git metadata without network fetch;
 - repair-plan generation from a JSON report without applying fixes;
-- gated fix preview skeleton with `--approve action-id`, backup intent, diff intent, rollback hint, and no registered mutating executors yet;
+- gated fix mode with `--approve action-id`, backup manifest, diff preview, rollback hint, and one narrow registered executor for `config.missing`;
 - safe JSON/Markdown reports;
 - redaction tests and read-only tests.
 
 Planned but not implemented yet:
 
-- registered safe fix executors for specific findings after backup/diff/rollback semantics are proven.
+- additional registered fix executors for specific findings after backup/diff/rollback semantics are proven per executor.
 
 Do not treat the current preview as a complete system doctor or repair tool yet.
 
@@ -67,16 +67,16 @@ hermes-system-doctor quick --all-profiles --markdown --output report.md
 hermes-system-doctor full --json
 hermes-system-doctor post-update --json
 hermes-system-doctor repair-plan --input report.json --output repair-plan.json
-hermes-system-doctor fix --plan repair-plan.json --approve rp-0001 --output fix-preview.json
+hermes-system-doctor fix --hermes-home ~/.hermes --plan repair-plan.json --approve rp-0001 --output fix-preview.json
 ```
 
-Note: `quick` runs the current safe core checks. `full` and `post-update` also include local post-update drift diagnostics. `fix` is currently a gated preview skeleton: it validates one approved action id and renders backup/diff/rollback intent, but blocks execution because no mutating executors are registered yet.
+Note: `quick` runs the current safe core checks. `full` and `post-update` also include local post-update drift diagnostics. `fix` is approval-gated and intentionally narrow: the only registered mutating executor currently creates a minimal parseable `config.yaml` stub for `config.missing` after writing a backup manifest. Other repair candidates remain preview-only or blocked.
 
 ## Core safety promise
 
-Default mode is read-only and offline:
+Diagnostic modes are read-only and offline; gated `fix --execute` is the only mode that can write, and only for registered narrow executors:
 
-- no config writes;
+- no config writes in diagnostic or repair-plan modes;
 - no gateway restart;
 - no gateway platform probes;
 - no cron execution;
@@ -85,7 +85,7 @@ Default mode is read-only and offline:
 - no platform messages;
 - no network probes;
 - no repair execution in `repair-plan` mode;
-- no repair execution in `fix` mode until a future registered executor passes approval, backup, diff, rollback, and tests;
+- `fix --execute` can write only through registered narrow executors; current executor writes a backup manifest and a minimal `config.yaml` stub for `config.missing` only;
 - no raw secrets in reports.
 
 ## Canonical source
