@@ -12,12 +12,22 @@ license = "MIT"
 authors = [{name = "Aleksei Ulianov / Sprut_AI"}]
 keywords = ["hermes-agent", "diagnostics", "profiles", "cron", "mcp", "agent-ops"]
 classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: System Administrators",
+  "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
 ]
 dependencies = ["PyYAML>=6.0"]
+
+[project.urls]
+Homepage = "https://github.com/AlekseiUL/hermes-system-doctor"
+Repository = "https://github.com/AlekseiUL/hermes-system-doctor"
+Issues = "https://github.com/AlekseiUL/hermes-system-doctor/issues"
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.6", "build>=1.2"]

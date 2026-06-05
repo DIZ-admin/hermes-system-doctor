@@ -1,0 +1,132 @@
+name: repository-quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Python ${{ matrix.python-version }} quality
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+
+      - name: Lint
+        run: python -m ruff check .
+
+      - name: Tests
+        run: python -m pytest -q
+
+      - name: Build package
+        run: |
+          rm -rf dist build *.egg-info src/*.egg-info
+          python -m build
+
+      - name: Wheel smoke
+        run: |
+          tmp="$(mktemp -d)"
+          python -m venv "$tmp/venv"
+          "$tmp/venv/bin/python" -m pip install --upgrade pip
+          "$tmp/venv/bin/python" -m pip install dist/*.whl
+          home="$tmp/hermes"
+          mkdir -p "$home/profiles/operator"
+          "$tmp/venv/bin/hermes-system-doctor" full --hermes-home "$home" --json --output "$tmp/report.json"
+          "$tmp/venv/bin/hermes-system-doctor" repair-plan --input "$tmp/report.json" --output "$tmp/repair-plan.json"
+          action="$("$tmp/venv/bin/python" -c 'import json, sys; plan=json.load(open(sys.argv[1], encoding="utf-8")); print(next(action["action_id"] for action in plan["actions"] if action["finding_id"] == "config.missing"))' "$tmp/repair-plan.json")"
+          "$tmp/venv/bin/hermes-system-doctor" fix --hermes-home "$home" --plan "$tmp/repair-plan.json" --approve "$action" --execute --output "$tmp/fix-result.json"
+          "$tmp/venv/bin/hermes-system-doctor" full --hermes-home "$home" --json --output "$tmp/after.json"
+          "$tmp/venv/bin/python" -c 'import json, sys; fix=json.load(open(sys.argv[1], encoding="utf-8")); after=json.load(open(sys.argv[2], encoding="utf-8")); assert fix["status"] == "APPLIED"; assert fix["backup"]["performed"] is True; assert not any(f["id"] == "config.missing" for c in after["checks"] for f in c["findings"])' "$tmp/fix-result.json" "$tmp/after.json"
+
+      - name: Unpacked sdist tests
+        run: |
+          tmp="$(mktemp -d)"
+          tar -xzf dist/hermes_system_doctor-*.tar.gz -C "$tmp"
+          cd "$tmp"/hermes_system_doctor-*
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install pytest pyyaml
+          .venv/bin/python -m pip install .
+          .venv/bin/python -m pytest -q
+
+      - name: Privacy and artifact scan
+        run: |
+          python - <<'PY'
+          import pathlib, re, subprocess, sys, tarfile, zipfile
+
+          patterns = {
+              'private_path': re.compile(r'/Users/[^/\s]+|MIKE_CENTER|AI_CENTER'),
+              'bytecode': re.compile(r'(__pycache__|\.pyc$)'),
+              'accusation': re.compile(r'(?i)(\bstolen\b|\btheft\b|\bукрал\b|\bкраж[аеиуой]*\b|\bворов(?:ство|али|ал|ать)?\b)'),
+              'secret_assignment': re.compile(r'(?i)(api[_-]?key|token|secret|password|cookie)\s*[:=]\s*[A-Za-z0-9_./+\-=]{12,}'),
+          }
+          skip = {'.gitignore', '.github/workflows/repository-quality.yml'}
+
+          def allowed(line: str) -> bool:
+              return '[REDACTED_PATH]' in line or 'LEAK_TRAP_' in line
+
+          def scan_text(label: str, text: str):
+              bad = []
+              for i, line in enumerate(text.splitlines(), 1):
+                  for kind, rx in patterns.items():
+                      if rx.search(line) and not allowed(line):
+                          bad.append((kind, label, i, line[:160]))
+              return bad
+
+          bad = []
+          for file_name in subprocess.check_output(['git', 'ls-files'], text=True).splitlines():
+              if file_name in skip:
+                  continue
+              if file_name.endswith(('.pyc', '.pyo')) or '__pycache__' in file_name:
+                  bad.append(('bytecode', file_name, 0, ''))
+                  continue
+              data = pathlib.Path(file_name).read_bytes()
+              if b'\0' in data[:4096]:
+                  continue
+              bad.extend(scan_text(file_name, data.decode('utf-8', errors='ignore')))
+
+          for path in pathlib.Path('dist').glob('*'):
+              if path.suffix == '.gz':
+                  with tarfile.open(path) as tf:
+                      for member in tf.getmembers():
+                          if not member.isfile():
+                              continue
+                          data = tf.extractfile(member).read()
+                          if b'\0' in data[:4096]:
+                              continue
+                          bad.extend(scan_text(f'{path}:{member.name}', data.decode('utf-8', errors='ignore')))
+              elif path.suffix == '.whl':
+                  with zipfile.ZipFile(path) as zf:
+                      for name in zf.namelist():
+                          data = zf.read(name)
+                          if b'\0' in data[:4096]:
+                              continue
+                          bad.extend(scan_text(f'{path}:{name}', data.decode('utf-8', errors='ignore')))
+
+          for item in bad[:100]:
+              print(' | '.join(map(str, item)))
+          print('findings:', len(bad))
+          sys.exit(1 if bad else 0)
+          PY
