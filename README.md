@@ -15,14 +15,14 @@ Early read-only preview. Current implementation covers the first core slice only
 - missing cron script/workdir detection;
 - log category scanning without raw log excerpts;
 - auth/secret-adjacent file presence inventory without reading payloads;
+- memory surface inventory without dumping memory content;
+- skills integrity checks without dumping skill bodies;
 - safe JSON/Markdown reports;
 - redaction tests and read-only tests.
 
 Planned but not implemented yet:
 
 - gateway checks;
-- memory checks;
-- skills checks;
 - plugins checks;
 - MCP checks;
 - post-update drift checks;

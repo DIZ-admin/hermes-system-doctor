@@ -10,7 +10,9 @@ from .checks import (
     cron_check,
     discover_home,
     logs_check,
+    memory_check,
     profile_inventory_check,
+    skills_check,
 )
 from .models import DoctorReport
 from .path_utils import safe_home_label
@@ -27,6 +29,8 @@ def build_report(mode: str, hermes_home: Path) -> DoctorReport:
                 cron_check(hermes_home),
                 logs_check(hermes_home),
                 auth_surface_check(hermes_home),
+                memory_check(hermes_home),
+                skills_check(hermes_home),
             ]
         )
     return DoctorReport.build(mode=mode, hermes_home=safe_home_label(hermes_home), checks=checks)
