@@ -18,6 +18,7 @@ hermes-system-doctor quick
 hermes-system-doctor full
 hermes-system-doctor post-update
 hermes-system-doctor repair-plan --input report.json --output repair-plan.json
+hermes-system-doctor fix --plan repair-plan.json --approve rp-0001 --output fix-preview.json
 ```
 
 Alias:
@@ -42,10 +43,12 @@ hsd full --profile work
 - Post-update drift: local source-ref drift, stale process hints, import/update/version signals from capped logs; no network fetch or dependency imports by default.
 - JSON + Markdown reports.
 - Dry-run repair-plan generation from reports; no autofix.
+- Gated fix preview skeleton: validates `--approve action-id`, renders backup/diff/rollback intent, and blocks execution until a registered safe executor exists.
 
 ## Non-goals for MVP
 
 - No autofix.
+- No registered mutating fix executors until backup creation, diff preview, rollback, and action-specific tests are proven.
 - No writes except explicit `--output` report path.
 - No service restart.
 - No cron execution.

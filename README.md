@@ -22,12 +22,13 @@ Early read-only preview. Current implementation covers the first core slice only
 - MCP server config checks without connecting to servers or running tools;
 - post-update drift signals from local logs and local git metadata without network fetch;
 - repair-plan generation from a JSON report without applying fixes;
+- gated fix preview skeleton with `--approve action-id`, backup intent, diff intent, rollback hint, and no registered mutating executors yet;
 - safe JSON/Markdown reports;
 - redaction tests and read-only tests.
 
 Planned but not implemented yet:
 
-- gated fix mode.
+- registered safe fix executors for specific findings after backup/diff/rollback semantics are proven.
 
 Do not treat the current preview as a complete system doctor or repair tool yet.
 
@@ -66,9 +67,10 @@ hermes-system-doctor quick --all-profiles --markdown --output report.md
 hermes-system-doctor full --json
 hermes-system-doctor post-update --json
 hermes-system-doctor repair-plan --input report.json --output repair-plan.json
+hermes-system-doctor fix --plan repair-plan.json --approve rp-0001 --output fix-preview.json
 ```
 
-Note: `quick` runs the current safe core checks. `full` and `post-update` also include local post-update drift diagnostics. Gated fix execution is still planned.
+Note: `quick` runs the current safe core checks. `full` and `post-update` also include local post-update drift diagnostics. `fix` is currently a gated preview skeleton: it validates one approved action id and renders backup/diff/rollback intent, but blocks execution because no mutating executors are registered yet.
 
 ## Core safety promise
 
@@ -83,6 +85,7 @@ Default mode is read-only and offline:
 - no platform messages;
 - no network probes;
 - no repair execution in `repair-plan` mode;
+- no repair execution in `fix` mode until a future registered executor passes approval, backup, diff, rollback, and tests;
 - no raw secrets in reports.
 
 ## Canonical source

@@ -18,6 +18,12 @@ from .checks import (
     profile_inventory_check,
     skills_check,
 )
+from .fix_executor import (
+    build_fix_preview,
+    fix_preview_to_json,
+    fix_preview_to_markdown,
+    load_repair_plan,
+)
 from .models import DoctorReport
 from .path_utils import safe_home_label
 from .repair_plan import build_repair_plan, load_report, repair_plan_to_json, repair_plan_to_markdown
@@ -48,7 +54,7 @@ def build_report(mode: str, hermes_home: Path) -> DoctorReport:
 
 def parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="hermes-system-doctor")
-    p.add_argument("command", choices=["discover", "quick", "full", "post-update", "repair-plan", "version"])
+    p.add_argument("command", choices=["discover", "quick", "full", "post-update", "repair-plan", "fix", "version"])
     p.add_argument("--hermes-home", default="~/.hermes")
     p.add_argument(
         "--all-profiles",
@@ -59,6 +65,9 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--markdown", action="store_true")
     p.add_argument("--output")
     p.add_argument("--input", help="Input JSON report for repair-plan mode")
+    p.add_argument("--plan", help="Input repair-plan JSON for fix preview mode")
+    p.add_argument("--approve", help="Approved repair-plan action id for fix preview mode")
+    p.add_argument("--execute", action="store_true", help="Request execution; currently blocked until a safe executor exists")
     p.add_argument("--fail-on", choices=["unknown", "warn", "fail", "needs-approval"], default=None)
     return p
 
@@ -77,6 +86,23 @@ def main(argv: list[str] | None = None) -> int:
             Path(args.output).write_text(rendered, encoding="utf-8")
         else:
             print(rendered, end="")
+        return 0
+    if args.command == "fix":
+        if not args.plan:
+            parser().error("fix requires --plan repair-plan.json")
+        if not args.approve:
+            parser().error("fix requires --approve action-id")
+        try:
+            preview = build_fix_preview(load_repair_plan(Path(args.plan)), args.approve, execute=args.execute)
+        except (OSError, ValueError) as exc:
+            parser().error(f"fix failed: {exc}")
+        rendered = fix_preview_to_markdown(preview) if args.markdown else fix_preview_to_json(preview)
+        if args.output:
+            Path(args.output).write_text(rendered, encoding="utf-8")
+        else:
+            print(rendered, end="")
+        if preview.status.startswith("BLOCKED"):
+            return 2 if args.execute else 1
         return 0
     report = build_report(args.command, Path(args.hermes_home).expanduser())
     rendered = to_json(report) if args.json else to_markdown(report)
