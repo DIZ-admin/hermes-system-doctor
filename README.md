@@ -11,6 +11,7 @@ Early read-only preview. Current implementation covers the first core slice only
 - Hermes home discovery;
 - root + named profile inventory;
 - `config.yaml` existence and YAML parseability;
+- gateway config/log/PID signals without service restart or platform probes;
 - cron metadata parsing;
 - missing cron script/workdir detection;
 - log category scanning without raw log excerpts;
@@ -19,13 +20,12 @@ Early read-only preview. Current implementation covers the first core slice only
 - skills integrity checks without dumping skill bodies;
 - plugins inventory without executing plugin code;
 - MCP server config checks without connecting to servers or running tools;
+- post-update drift signals from local logs and local git metadata without network fetch;
 - safe JSON/Markdown reports;
 - redaction tests and read-only tests.
 
 Planned but not implemented yet:
 
-- gateway checks;
-- post-update drift checks;
 - repair planning / gated fix mode.
 
 Do not treat the current preview as a complete system doctor or repair tool yet.
@@ -66,7 +66,7 @@ hermes-system-doctor full --json
 hermes-system-doctor post-update --json
 ```
 
-Note: `full` and `post-update` currently run the same first-slice checks as `quick`. Dedicated deep checks are planned.
+Note: `quick` runs the current safe core checks. `full` and `post-update` also include local post-update drift diagnostics. Dedicated repair planning is still planned.
 
 ## Core safety promise
 
@@ -74,6 +74,7 @@ Default mode is read-only and offline:
 
 - no config writes;
 - no gateway restart;
+- no gateway platform probes;
 - no cron execution;
 - no plugin execution;
 - no MCP tool execution;

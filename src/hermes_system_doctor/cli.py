@@ -9,10 +9,12 @@ from .checks import (
     config_check,
     cron_check,
     discover_home,
+    gateway_check,
     logs_check,
     memory_check,
     mcp_check,
     plugins_check,
+    post_update_drift_check,
     profile_inventory_check,
     skills_check,
 )
@@ -28,6 +30,7 @@ def build_report(mode: str, hermes_home: Path) -> DoctorReport:
             [
                 profile_inventory_check(hermes_home),
                 config_check(hermes_home),
+                gateway_check(hermes_home),
                 cron_check(hermes_home),
                 logs_check(hermes_home),
                 auth_surface_check(hermes_home),
@@ -37,6 +40,8 @@ def build_report(mode: str, hermes_home: Path) -> DoctorReport:
                 mcp_check(hermes_home),
             ]
         )
+    if mode in {"full", "post-update"}:
+        checks.append(post_update_drift_check(hermes_home))
     return DoctorReport.build(mode=mode, hermes_home=safe_home_label(hermes_home), checks=checks)
 
 

@@ -32,14 +32,14 @@ hsd full --profile work
 - Environment inventory: OS, Python, Hermes CLI path/version, active `HERMES_HOME`/profile signals.
 - Profile discovery: root profile + named profiles under `profiles/`.
 - Config checks: existence, parseability, unknown/deprecated keys where rules exist.
-- Gateway checks: config/log/process signals; no platform calls by default.
+- Gateway checks: config/log/PID signals; no platform calls or service restart by default.
 - Cron checks: metadata parse, enabled/paused counts, missing script/workdir references.
 - Memory checks: provider presence, file/DB metadata, size pressure; no raw memory dump by default.
 - Skills checks: count, duplicate names, frontmatter, missing linked files, huge files.
 - Plugins checks: enabled/configured plugin names, local plugin directories, recognized manifest presence/parseability, symlink skips, and inline-sensitive metadata detection. Implemented as read-only inventory; no plugin code execution.
 - MCP checks: configured servers, command/url shape, missing executable/env/header names; no server connection or tool execution by default.
 - Logs checks: capped, redacted category matching.
-- Post-update drift: version/source drift, stale process hints, import errors after update, config compatibility warnings.
+- Post-update drift: local source-ref drift, stale process hints, import/update/version signals from capped logs; no network fetch or dependency imports by default.
 - JSON + Markdown reports.
 
 ## Non-goals for MVP
