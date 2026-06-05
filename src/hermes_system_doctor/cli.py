@@ -20,6 +20,7 @@ from .checks import (
 )
 from .models import DoctorReport
 from .path_utils import safe_home_label
+from .repair_plan import build_repair_plan, load_report, repair_plan_to_json, repair_plan_to_markdown
 from .reporting import to_json, to_markdown
 
 
@@ -47,7 +48,7 @@ def build_report(mode: str, hermes_home: Path) -> DoctorReport:
 
 def parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="hermes-system-doctor")
-    p.add_argument("command", choices=["discover", "quick", "full", "post-update", "version"])
+    p.add_argument("command", choices=["discover", "quick", "full", "post-update", "repair-plan", "version"])
     p.add_argument("--hermes-home", default="~/.hermes")
     p.add_argument(
         "--all-profiles",
@@ -57,6 +58,7 @@ def parser() -> argparse.ArgumentParser:
     p.add_argument("--json", action="store_true")
     p.add_argument("--markdown", action="store_true")
     p.add_argument("--output")
+    p.add_argument("--input", help="Input JSON report for repair-plan mode")
     p.add_argument("--fail-on", choices=["unknown", "warn", "fail", "needs-approval"], default=None)
     return p
 
@@ -65,6 +67,16 @@ def main(argv: list[str] | None = None) -> int:
     args = parser().parse_args(argv)
     if args.command == "version":
         print(__version__)
+        return 0
+    if args.command == "repair-plan":
+        if not args.input:
+            parser().error("repair-plan requires --input report.json")
+        plan = build_repair_plan(load_report(Path(args.input)))
+        rendered = repair_plan_to_markdown(plan) if args.markdown else repair_plan_to_json(plan)
+        if args.output:
+            Path(args.output).write_text(rendered, encoding="utf-8")
+        else:
+            print(rendered, end="")
         return 0
     report = build_report(args.command, Path(args.hermes_home).expanduser())
     rendered = to_json(report) if args.json else to_markdown(report)

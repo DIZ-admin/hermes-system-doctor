@@ -21,12 +21,13 @@ Early read-only preview. Current implementation covers the first core slice only
 - plugins inventory without executing plugin code;
 - MCP server config checks without connecting to servers or running tools;
 - post-update drift signals from local logs and local git metadata without network fetch;
+- repair-plan generation from a JSON report without applying fixes;
 - safe JSON/Markdown reports;
 - redaction tests and read-only tests.
 
 Planned but not implemented yet:
 
-- repair planning / gated fix mode.
+- gated fix mode.
 
 Do not treat the current preview as a complete system doctor or repair tool yet.
 
@@ -64,9 +65,10 @@ hermes-system-doctor discover --json
 hermes-system-doctor quick --all-profiles --markdown --output report.md
 hermes-system-doctor full --json
 hermes-system-doctor post-update --json
+hermes-system-doctor repair-plan --input report.json --output repair-plan.json
 ```
 
-Note: `quick` runs the current safe core checks. `full` and `post-update` also include local post-update drift diagnostics. Dedicated repair planning is still planned.
+Note: `quick` runs the current safe core checks. `full` and `post-update` also include local post-update drift diagnostics. Gated fix execution is still planned.
 
 ## Core safety promise
 
@@ -80,6 +82,7 @@ Default mode is read-only and offline:
 - no MCP tool execution;
 - no platform messages;
 - no network probes;
+- no repair execution in `repair-plan` mode;
 - no raw secrets in reports.
 
 ## Canonical source

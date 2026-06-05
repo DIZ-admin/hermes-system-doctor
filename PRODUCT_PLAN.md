@@ -17,7 +17,7 @@ hermes-system-doctor discover
 hermes-system-doctor quick
 hermes-system-doctor full
 hermes-system-doctor post-update
-hermes-system-doctor report --input report.json --format markdown
+hermes-system-doctor repair-plan --input report.json --output repair-plan.json
 ```
 
 Alias:
@@ -41,6 +41,7 @@ hsd full --profile work
 - Logs checks: capped, redacted category matching.
 - Post-update drift: local source-ref drift, stale process hints, import/update/version signals from capped logs; no network fetch or dependency imports by default.
 - JSON + Markdown reports.
+- Dry-run repair-plan generation from reports; no autofix.
 
 ## Non-goals for MVP
 
