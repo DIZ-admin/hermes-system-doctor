@@ -1,0 +1,4 @@
+model:
+  provider: test
+mcp:
+  enabled: false
