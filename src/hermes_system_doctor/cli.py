@@ -4,7 +4,14 @@ import argparse
 from pathlib import Path
 
 from . import __version__
-from .checks import config_check, cron_check, discover_home, profile_inventory_check
+from .checks import (
+    auth_surface_check,
+    config_check,
+    cron_check,
+    discover_home,
+    logs_check,
+    profile_inventory_check,
+)
 from .models import DoctorReport
 from .path_utils import safe_home_label
 from .reporting import to_json, to_markdown
@@ -13,7 +20,15 @@ from .reporting import to_json, to_markdown
 def build_report(mode: str, hermes_home: Path) -> DoctorReport:
     checks = [discover_home(hermes_home)]
     if mode in {"quick", "full", "post-update"}:
-        checks.extend([profile_inventory_check(hermes_home), config_check(hermes_home), cron_check(hermes_home)])
+        checks.extend(
+            [
+                profile_inventory_check(hermes_home),
+                config_check(hermes_home),
+                cron_check(hermes_home),
+                logs_check(hermes_home),
+                auth_surface_check(hermes_home),
+            ]
+        )
     return DoctorReport.build(mode=mode, hermes_home=safe_home_label(hermes_home), checks=checks)
 
 

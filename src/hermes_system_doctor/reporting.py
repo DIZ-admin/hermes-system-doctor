@@ -28,6 +28,9 @@ def to_markdown(report: DoctorReport) -> str:
             f"Severity: `{check.severity}`",
             f"Summary: {redact(check.summary)}",
         ]
+        if check.name in {"logs", "auth_surface"} and check.facts:
+            compact_facts = json.dumps(check.facts, ensure_ascii=False, sort_keys=True)
+            lines.append(f"Facts: `{redact(compact_facts[:700])}`")
         for finding in check.findings:
             lines += [
                 "",
@@ -35,6 +38,9 @@ def to_markdown(report: DoctorReport) -> str:
             ]
             if finding.profile:
                 lines.append(f"  - Profile: `{redact(finding.profile)}`")
+            if finding.evidence:
+                safe_evidence = ", ".join(redact(str(item)) for item in finding.evidence[:5])
+                lines.append(f"  - Evidence: `{safe_evidence}`")
             if finding.risk:
                 lines.append(f"  - Risk: {redact(finding.risk)}")
             if finding.next_action:

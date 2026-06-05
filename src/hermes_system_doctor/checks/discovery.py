@@ -11,8 +11,8 @@ def profile_dirs(hermes_home: Path) -> list[tuple[str, Path]]:
     if (hermes_home / "config.yaml").exists():
         profiles.append(("default", hermes_home))
     profiles_root = hermes_home / "profiles"
-    if profiles_root.is_dir():
-        profiles.extend((p.name, p) for p in sorted(profiles_root.iterdir()) if p.is_dir())
+    if profiles_root.is_dir() and not profiles_root.is_symlink():
+        profiles.extend((p.name, p) for p in sorted(profiles_root.iterdir()) if p.is_dir() and not p.is_symlink())
     return profiles
 
 

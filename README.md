@@ -13,14 +13,14 @@ Early read-only preview. Current implementation covers the first core slice only
 - `config.yaml` existence and YAML parseability;
 - cron metadata parsing;
 - missing cron script/workdir detection;
+- log category scanning without raw log excerpts;
+- auth/secret-adjacent file presence inventory without reading payloads;
 - safe JSON/Markdown reports;
 - redaction tests and read-only tests.
 
 Planned but not implemented yet:
 
 - gateway checks;
-- log category checks;
-- auth-surface inventory;
 - memory checks;
 - skills checks;
 - plugins checks;
@@ -36,7 +36,7 @@ Do not treat the current preview as a complete system doctor or repair tool yet.
 - Hermes users starting to run several profiles or cron jobs.
 - Operators who want read-only diagnostics before touching services.
 
-It is not an auto-repair tool, cloud scanner, official Hermes replacement, or support backdoor.
+It is not an auto-repair tool, cloud scanner, official Hermes replacement, or support backdoor. It reports presence/risk of auth surfaces only; it does not validate whether credentials work.
 
 ## Requirements
 
