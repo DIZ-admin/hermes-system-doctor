@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 import sys
 
@@ -62,6 +63,24 @@ def test_gateway_reports_config_pid_and_log_signals_without_raw_log_text(tmp_pat
     assert gateway["facts"]["platform_probes"] == "not_run"
     assert gateway["facts"]["service_restarts"] == "not_run"
     assert gateway["facts"]["messages_sent"] == "not_run"
+
+
+def test_gateway_accepts_json_pid_file_when_process_exists(tmp_path):
+    home = tmp_path / "hermes"
+    home.mkdir()
+    (home / "config.yaml").write_text("platforms: []\n", encoding="utf-8")
+    (home / "gateway.pid").write_text(
+        json.dumps({"pid": os.getpid(), "kind": "hermes-gateway"}) + "\n",
+        encoding="utf-8",
+    )
+
+    result = run_cli("quick", "--hermes-home", str(home), "--json")
+    assert result.returncode == 0
+    data = json.loads(result.stdout)
+    gateway = check_by_name(data, "gateway")
+    ids = {finding["id"] for finding in gateway["findings"]}
+    assert "gateway.pid_stale_or_unreadable" not in ids
+    assert gateway["facts"]["pid_files"] == {"default:gateway.pid": "running"}
 
 
 def test_gateway_symlink_log_is_skipped_without_following_target(tmp_path):

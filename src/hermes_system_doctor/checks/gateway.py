@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import re
 from pathlib import Path
@@ -75,9 +76,23 @@ def _pid_status(pid_file: Path) -> tuple[str | None, str | None]:
     if pid_file.is_symlink():
         return None, "symlink"
     try:
-        raw = pid_file.read_text(encoding="utf-8", errors="ignore").strip().splitlines()[0]
-    except (OSError, IndexError):
+        raw_text = pid_file.read_text(encoding="utf-8", errors="ignore").strip()
+    except OSError:
         return None, "read_failed"
+    if not raw_text:
+        return None, "read_failed"
+
+    raw = raw_text.splitlines()[0].strip()
+    if raw.startswith("{"):
+        try:
+            parsed = json.loads(raw_text)
+        except json.JSONDecodeError:
+            return None, "invalid"
+        if not isinstance(parsed, dict):
+            return None, "invalid"
+        pid_value = parsed.get("pid")
+        raw = str(pid_value).strip() if pid_value is not None else ""
+
     if not raw.isdigit():
         return None, "invalid"
     pid = int(raw)
