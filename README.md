@@ -8,6 +8,8 @@ Stock `hermes doctor` checks the base install. **Hermes Agent System Doctor** ma
 
 It is built for operators who want proof before touching a live agent runtime.
 
+Русское описание для презентации: [docs/hermes-system-doctor-ru.md](docs/hermes-system-doctor-ru.md)
+
 ## What it does now
 
 Current implementation:
