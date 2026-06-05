@@ -1,24 +1,49 @@
 # Hermes Agent System Doctor
 
-Read-only system diagnostics for [Hermes Agent](https://github.com/NousResearch/hermes-agent) installations.
+Read-only diagnostics for [Hermes Agent](https://github.com/NousResearch/hermes-agent) installations.
 
-Hermes Agent System Doctor inventories local Hermes profiles, config, gateway, cron, memory, skills, plugins, MCP, logs, and post-update drift, then produces a redacted report with safe next steps.
-
-It complements the stock `hermes doctor`: stock doctor checks the base install; this tool maps the wider local Hermes system and separates **fact**, **risk**, **unknown**, and **approval-required repair**.
+Hermes Agent System Doctor is being built as a discovery-first companion to the stock `hermes doctor`. Stock `hermes doctor` checks the base install; this tool is meant to map the wider local Hermes system and separate **fact**, **risk**, **unknown**, and **approval-required repair**.
 
 ## Status
 
-Early product scaffold. The first public release target is a read-only MVP with synthetic fixtures, redaction tests, JSON/Markdown reports, and no fix mode.
+Early read-only preview. Current implementation covers the first core slice only:
+
+- Hermes home discovery;
+- root + named profile inventory;
+- `config.yaml` existence and YAML parseability;
+- cron metadata parsing;
+- missing cron script/workdir detection;
+- safe JSON/Markdown reports;
+- redaction tests and read-only tests.
+
+Planned but not implemented yet:
+
+- gateway checks;
+- log category checks;
+- auth-surface inventory;
+- memory checks;
+- skills checks;
+- plugins checks;
+- MCP checks;
+- post-update drift checks;
+- repair planning / gated fix mode.
+
+Do not treat the current preview as a complete system doctor or repair tool yet.
 
 ## Who is this for?
 
-- Hermes users with one local profile who want a safe health snapshot.
-- Hermes users running several profiles, gateways, cron jobs, skills, plugins, or MCP servers.
-- Operators who want a post-update drift report before touching services.
+- Hermes users with one local profile who want a safe first health snapshot.
+- Hermes users starting to run several profiles or cron jobs.
+- Operators who want read-only diagnostics before touching services.
 
 It is not an auto-repair tool, cloud scanner, official Hermes replacement, or support backdoor.
 
-## Planned quick start
+## Requirements
+
+- Python 3.10+
+- Local Hermes Agent home, usually `~/.hermes`
+
+## Preview quick start
 
 ```bash
 uvx hermes-system-doctor quick --all-profiles --markdown --output hermes-system-report.md
@@ -31,6 +56,17 @@ python -m pip install -e ".[dev]"
 hermes-system-doctor discover --hermes-home tests/fixtures/hermes_home_minimal --json
 pytest -q
 ```
+
+## Current commands
+
+```bash
+hermes-system-doctor discover --json
+hermes-system-doctor quick --all-profiles --markdown --output report.md
+hermes-system-doctor full --json
+hermes-system-doctor post-update --json
+```
+
+Note: `full` and `post-update` currently run the same first-slice checks as `quick`. Dedicated deep checks are planned.
 
 ## Core safety promise
 

@@ -21,6 +21,11 @@ def parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(prog="hermes-system-doctor")
     p.add_argument("command", choices=["discover", "quick", "full", "post-update", "version"])
     p.add_argument("--hermes-home", default="~/.hermes")
+    p.add_argument(
+        "--all-profiles",
+        action="store_true",
+        help="Scan all profiles under the selected Hermes home; currently the default when profiles/ exists.",
+    )
     p.add_argument("--json", action="store_true")
     p.add_argument("--markdown", action="store_true")
     p.add_argument("--output")

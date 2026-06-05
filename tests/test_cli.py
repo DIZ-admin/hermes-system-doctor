@@ -43,6 +43,19 @@ def test_quick_multi_profile_fixture_reports_profiles():
     assert discovery["facts"]["profiles_count"] == 3
 
 
+def test_all_profiles_flag_is_accepted_for_preview_quickstart():
+    result = run_cli(
+        "quick",
+        "--all-profiles",
+        "--hermes-home",
+        "tests/fixtures/hermes_home_multi_profile",
+        "--json",
+    )
+    assert result.returncode == 0, result.stderr
+    data = json.loads(result.stdout)
+    assert data["status"] == "OK"
+
+
 def test_broken_config_returns_fail():
     result = run_cli(
         "quick",
