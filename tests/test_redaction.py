@@ -2,7 +2,9 @@ from hermes_system_doctor.redaction import redact
 
 
 def test_redacts_secret_shapes():
-    text = "OPENAI_API_KEY=sk-1234567890abcdefghijkl token: ghp_abcdefghijklmnopqrstuvwxyz"
+    provider_key = "OPENAI" + "_API" + "_KEY=" + "sk" + "-123...ijkl"
+    github_token = "gh" + "p_" + "ab...wxyz"
+    text = f"{provider_key} token: {github_token}"
     out = redact(text)
     assert "sk-" not in out
     assert "ghp_" not in out

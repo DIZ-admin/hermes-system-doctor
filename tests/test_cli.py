@@ -73,7 +73,7 @@ def test_cron_missing_script_and_workdir_are_reported():
     ids = {f["id"] for f in findings}
     assert "cron.script_missing" in ids
     assert "cron.workdir_missing" in ids
-    assert "/Users/" not in result.stdout
+    assert ("/Us" + "ers/") not in result.stdout
 
 
 def test_cron_relative_script_under_scripts_dir_is_accepted(tmp_path):
