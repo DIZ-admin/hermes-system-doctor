@@ -1,0 +1,37 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ['3.10', '3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check .
+      - name: Test
+        run: pytest -q
+      - name: Build
+        run: python -m build
+      - name: Wheel smoke
+        run: |
+          python -m venv /tmp/hsd-smoke
+          /tmp/hsd-smoke/bin/python -m pip install --upgrade pip
+          /tmp/hsd-smoke/bin/pip install dist/*.whl
+          /tmp/hsd-smoke/bin/hermes-system-doctor version
+          /tmp/hsd-smoke/bin/hermes-system-doctor discover --hermes-home tests/fixtures/hermes_home_minimal --json
