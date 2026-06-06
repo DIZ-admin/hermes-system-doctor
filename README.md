@@ -207,6 +207,13 @@ The release gate also smokes the built wheel, unpacks the sdist and runs tests t
 - `fix --execute` пишет только через зарегистрированные узкие executors;
 - сейчас зарегистрирован только `config.missing` — создание минимального `config.yaml` stub без ключей и провайдеров.
 
+## Public links / Полезные ссылки
+
+- YouTube: https://youtube.com/@alekseiulianov
+- Telegram channel - Sprut AI: https://t.me/Sprut_AI
+- Telegram chat - Sprut AI: https://t.me/+eH-qNIDmud8zNDZi
+- AI Операционка: https://t.me/tribute/app?startapp=sJyg
+
 ## Canonical source
 
 This project is maintained by Aleksei Ulianov / Sprut_AI.
