@@ -188,24 +188,78 @@ The release gate also smokes the built wheel, unpacks the sdist and runs tests t
 
 ## Русская версия
 
-**Hermes Agent System Doctor** — безопасный диагностический CLI для Hermes Agent. Он не заменяет штатный `hermes doctor`, а смотрит шире: профили, gateway-сигналы, cron, logs, auth-поверхности, memory, skills, plugins, MCP и post-update drift.
+Hermes Agent System Doctor - это безопасный диагностический CLI для Hermes Agent.
 
-Главная идея: сначала факты, потом план, потом только точечный repair под явным approval.
+Обычный `hermes doctor` проверяет базовую установку. Этот repo смотрит шире: профили, gateway-сигналы, cron metadata, logs, auth-поверхности, memory, skills, plugins, MCP и local post-update drift. Смысл простой: сначала собрать факты, отделить риск от неизвестного, потом подготовить repair plan и только после явного approval делать точечный fix.
 
-Что можно показать зрителям:
+Он нужен операторам, которые не хотят трогать живой runtime вслепую.
 
-- сделал отчёт по локальному Hermes без чтения секретов;
-- получил список рисков и `UNKNOWN`, а не фальшивый зелёный статус;
-- сгенерировал repair-plan;
-- применил только один разрешённый action через `fix --execute`;
-- проверил повторным scan, что finding ушёл.
+## Что он умеет сейчас
 
-Безопасная граница:
+- находит Hermes home и root/named profiles;
+- проверяет наличие и parseability `config.yaml`;
+- читает gateway config/log/PID signals без restart и platform probes;
+- разбирает cron metadata без запуска jobs;
+- находит missing cron script/workdir references;
+- классифицирует logs по категориям без raw log excerpts;
+- инвентаризирует auth/secret-adjacent files без чтения payloads;
+- смотрит memory surfaces без dumping memory content;
+- проверяет skill metadata/frontmatter/linked-file integrity без чтения skill bodies;
+- инвентаризирует plugins без выполнения кода;
+- проверяет MCP server config shape без подключения к servers и tools;
+- показывает local post-update drift signals без network fetch;
+- генерирует dry-run repair plans из JSON reports;
+- поддерживает gated `fix --execute` для одного узкого executor: `config.missing`.
 
-- диагностические команды ничего не чинят и не перезапускают;
-- `repair-plan` ничего не пишет;
-- `fix --execute` пишет только через зарегистрированные узкие executors;
-- сейчас зарегистрирован только `config.missing` — создание минимального `config.yaml` stub без ключей и провайдеров.
+## Для кого
+
+- для пользователей Hermes, которые хотят health snapshot перед правкой config или restart;
+- для операторов с несколькими profiles, cron jobs, skills, plugins или MCP servers;
+- для тех, кто готовит upgrade, migration или post-update verification;
+- для команд, где repair должен идти через approval, backup и повторную проверку.
+
+## Что это не делает
+
+Это не official replacement для Hermes, не cloud scanner, не auto-repair bot, не credentials validator и не support backdoor.
+
+Diagnostic commands работают read-only и offline. Они не пишут config, не рестартят gateway, не запускают cron, plugins или MCP tools, не отправляют platform messages, не делают network probes и не печатают raw `.env`, `auth.json`, cookies, sessions, memory или log payloads.
+
+## Как работает repair flow
+
+1. `full` или `post-update` собирает факты.
+2. `repair-plan` превращает findings в actions, где нужен approval. Он ничего не пишет.
+3. `fix` требует `--plan`, `--approve action-id` и явный `--hermes-home`.
+4. `fix --execute` может писать только через зарегистрированные узкие executors.
+
+Сейчас зарегистрирован один executor: `config.missing`. Он создаёт минимальный parseable `config.yaml` stub после backup manifest. Он не добавляет providers, API keys или secrets.
+
+## Быстрый старт
+
+```bash
+git clone https://github.com/AlekseiUL/hermes-system-doctor
+cd hermes-system-doctor
+python -m pip install -e ".[dev]"
+hermes-system-doctor full --hermes-home ~/.hermes --markdown --output hermes-system-report.md
+```
+
+JSON report для automation:
+
+```bash
+hermes-system-doctor full --hermes-home ~/.hermes --json --output report.json
+hermes-system-doctor repair-plan --input report.json --output repair-plan.json
+```
+
+Preview конкретного approved action:
+
+```bash
+hermes-system-doctor fix --hermes-home ~/.hermes --plan repair-plan.json --approve rp-0001 --output fix-preview.json
+```
+
+Apply делать только если action относится к зарегистрированному executor и риск принят:
+
+```bash
+hermes-system-doctor fix --hermes-home ~/.hermes --plan repair-plan.json --approve rp-0001 --execute --output fix-result.json
+```
 
 ## Public links / Полезные ссылки
 
