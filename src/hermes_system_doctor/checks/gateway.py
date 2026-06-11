@@ -58,9 +58,9 @@ def _configured_platform_names(config: dict[str, Any]) -> tuple[list[str], list[
             if isinstance(item, str) and item.strip():
                 platforms.add(item.strip())
             elif isinstance(item, dict):
-                name = item.get("name") or item.get("platform")
-                if isinstance(name, str) and name.strip() and item.get("enabled") is not False:
-                    platforms.add(name.strip())
+                candidate_name = item.get("name") or item.get("platform")
+                if isinstance(candidate_name, str) and candidate_name.strip() and item.get("enabled") is not False:
+                    platforms.add(candidate_name.strip())
                 else:
                     shape_errors.append(f"platforms[]:{type(item).__name__}")
     elif value not in (None, {}):

@@ -3,8 +3,9 @@ from __future__ import annotations
 import re
 from collections import Counter
 from pathlib import Path
+from typing import Any
 
-from ..models import CheckResult, Finding
+from ..models import CheckResult, Finding, Severity
 from ..path_utils import safe_relpath
 from .discovery import profile_dirs
 
@@ -44,7 +45,7 @@ def _regular_log_files(logs_dir: Path) -> tuple[list[Path], int]:
 
 
 def logs_check(hermes_home: Path) -> CheckResult:
-    facts = {
+    facts: dict[str, Any] = {
         "profiles_with_logs": 0,
         "files_scanned": 0,
         "bytes_scanned": 0,
@@ -108,7 +109,7 @@ def logs_check(hermes_home: Path) -> CheckResult:
         )
 
     if category_counts:
-        severity = "WARN"
+        severity: Severity = "WARN"
     elif facts["profiles_with_logs"] == 0:
         severity = "OK"
     else:

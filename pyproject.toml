@@ -30,7 +30,15 @@ Repository = "https://github.com/AlekseiUL/hermes-system-doctor"
 Issues = "https://github.com/AlekseiUL/hermes-system-doctor/issues"
 
 [project.optional-dependencies]
-dev = ["pytest>=8", "ruff>=0.6", "build>=1.2"]
+dev = [
+  "pytest>=8",
+  "ruff>=0.6",
+  "build>=1.2",
+  "coverage[toml]>=7.6",
+  "mypy>=1.11",
+  "pip-audit>=2.7",
+  "types-PyYAML>=6.0.12",
+]
 
 [project.scripts]
 hermes-system-doctor = "hermes_system_doctor.cli:main"
@@ -42,3 +50,19 @@ where = ["src"]
 [tool.ruff]
 line-length = 100
 src = ["src", "tests"]
+
+[tool.coverage.run]
+branch = true
+source = ["hermes_system_doctor"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+fail_under = 15
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src", "tests"]
+warn_unused_configs = true
+no_implicit_optional = true
+check_untyped_defs = true

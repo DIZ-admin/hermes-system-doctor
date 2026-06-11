@@ -6,7 +6,7 @@ from typing import Any
 
 import yaml
 
-from ..models import CheckResult, Finding
+from ..models import CheckResult, Finding, Severity
 from ..path_utils import safe_relpath
 from .discovery import profile_dirs
 
@@ -300,5 +300,5 @@ def skills_check(hermes_home: Path) -> CheckResult:
                         next_action="Rename or consolidate duplicate skills in this profile after manual review.",
                     )
                 )
-    severity = "WARN" if findings else "OK"
+    severity: Severity = "WARN" if findings else "OK"
     return CheckResult("skills", severity, f"skills={facts['skills_found']} links={facts['links_checked']}", findings, facts)

@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections import Counter, defaultdict
 from pathlib import Path
 
-from ..models import CheckResult, Finding
+from ..models import CheckResult, Finding, Severity
 from ..path_utils import safe_relpath
 from .discovery import profile_dirs
 
@@ -90,11 +90,11 @@ def auth_surface_check(hermes_home: Path) -> CheckResult:
             counts[category] += 1
             profiles[profile_name][category] = profiles[profile_name].get(category, 0) + 1
             finding_id = "auth_surface.unexpected_location" if _unexpected(path, profile_path) else category
-            severity = "WARN"
+            finding_severity: Severity = "WARN"
             findings.append(
                 Finding(
                     id=finding_id,
-                    severity=severity,
+                    severity=finding_severity,
                     component="auth_surface",
                     profile=profile_name,
                     summary="Auth/secret-adjacent file name detected",
@@ -110,7 +110,7 @@ def auth_surface_check(hermes_home: Path) -> CheckResult:
         "profiles": {profile: dict(sorted(values.items())) for profile, values in sorted(profiles.items())},
         "skipped_symlinks": skipped_symlinks,
     }
-    severity = "WARN" if findings else "OK" if scanned_profiles else "UNKNOWN"
+    severity: Severity = "WARN" if findings else "OK" if scanned_profiles else "UNKNOWN"
     if scanned_profiles == 0:
         findings.append(
             Finding(

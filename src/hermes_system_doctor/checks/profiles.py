@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Any
 
-from ..models import CheckResult, Finding
+from ..models import CheckResult, Finding, Severity
 from .discovery import profile_dirs
 
 
 def profile_inventory_check(hermes_home: Path) -> CheckResult:
     findings: list[Finding] = []
     profiles = profile_dirs(hermes_home)
-    facts = {"profiles": []}
+    facts: dict[str, Any] = {"profiles": []}
     for name, path in profiles:
         facts["profiles"].append(
             {
@@ -32,5 +33,5 @@ def profile_inventory_check(hermes_home: Path) -> CheckResult:
                 next_action="Run hermes setup or pass the correct --hermes-home path.",
             )
         )
-    severity = "UNKNOWN" if findings else "OK"
+    severity: Severity = "UNKNOWN" if findings else "OK"
     return CheckResult("profiles", severity, f"profiles={len(profiles)}", findings, facts)

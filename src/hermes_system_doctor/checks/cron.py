@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from ..models import CheckResult, Finding
+from ..models import CheckResult, Finding, Severity
 from ..path_utils import safe_relpath
 from .discovery import profile_dirs
 
@@ -130,5 +130,5 @@ def cron_check(hermes_home: Path) -> CheckResult:
                             )
                         )
         facts["profiles"][profile_name] = profile_fact
-    severity = "FAIL" if any(f.severity == "FAIL" for f in findings) else "WARN" if findings else "OK"
+    severity: Severity = "FAIL" if any(f.severity == "FAIL" for f in findings) else "WARN" if findings else "OK"
     return CheckResult("cron", severity, f"jobs={facts['jobs_total']} findings={len(findings)}", findings, facts)

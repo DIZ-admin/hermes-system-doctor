@@ -43,10 +43,10 @@ def _git_ref(path: Path, ref: str) -> str | None:
             return None
         return text[:40] if re.fullmatch(r"[0-9a-fA-F]{40}", text[:40]) else None
     packed = path / ".git" / "packed-refs"
-    text = _safe_read_text_tail(packed, 512 * 1024)
-    if not text:
+    packed_text = _safe_read_text_tail(packed, 512 * 1024)
+    if not packed_text:
         return None
-    for line in text.splitlines():
+    for line in packed_text.splitlines():
         if line.startswith("#") or " " not in line:
             continue
         sha, packed_ref = line.split(" ", 1)

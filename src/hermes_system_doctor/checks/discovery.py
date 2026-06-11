@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from ..models import CheckResult, Finding
+from ..models import CheckResult, Finding, Severity
 from ..path_utils import safe_relpath
 
 
@@ -51,7 +51,7 @@ def discover_home(hermes_home: Path) -> CheckResult:
     facts["profiles"] = profiles
     facts["profiles_count"] = len(profiles)
     facts["inspected_default_home"] = str(hermes_home.expanduser()) == str(Path("~/.hermes").expanduser())
-    severity = "FAIL" if any(f.severity == "FAIL" for f in findings) else "OK" if profiles else "UNKNOWN"
+    severity: Severity = "FAIL" if any(f.severity == "FAIL" for f in findings) else "OK" if profiles else "UNKNOWN"
     summary = f"profiles={len(profiles)}"
     if not profiles:
         findings.append(

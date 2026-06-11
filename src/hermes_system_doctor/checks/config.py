@@ -5,7 +5,7 @@ from typing import Any
 
 import yaml
 
-from ..models import CheckResult, Finding
+from ..models import CheckResult, Finding, Severity
 from .discovery import profile_dirs
 
 SECRET_KEY_PARTS = ("key", "token", "secret", "password", "passwd", "auth")
@@ -72,5 +72,5 @@ def config_check(hermes_home: Path) -> CheckResult:
             )
         facts["profiles"][name] = profile_fact
 
-    severity = "FAIL" if any(f.severity == "FAIL" for f in findings) else "WARN" if findings else "OK"
+    severity: Severity = "FAIL" if any(f.severity == "FAIL" for f in findings) else "WARN" if findings else "OK"
     return CheckResult("config", severity, f"profiles={len(profiles)} findings={len(findings)}", findings, facts)

@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from ..models import CheckResult, Finding
+from ..models import CheckResult, Finding, Severity
 from ..path_utils import safe_relpath
 from .discovery import profile_dirs
 
@@ -194,5 +194,5 @@ def memory_check(hermes_home: Path) -> CheckResult:
                     next_action="Back up the profile and perform memory hygiene review; do not prune automatically.",
                 )
             )
-    severity = "WARN" if findings else "OK"
+    severity: Severity = "WARN" if findings else "OK"
     return CheckResult("memory", severity, f"surfaces={facts['surfaces_found']} bytes={facts['bytes']}", findings, facts)

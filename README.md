@@ -179,10 +179,17 @@ Expected behavior:
 
 ```bash
 python -m pip install -e ".[dev]"
-python -m ruff check .
-python -m pytest -q
-python -m build
+make check
 ```
+
+`make check` is the canonical local gate. It runs:
+
+- `ruff check .`
+- `mypy src tests`
+- `pytest -q`
+- `coverage run -m pytest -q` plus `coverage report` with the configured baseline fail-under threshold; this starts as a ratchetable floor, not a claim of strong coverage
+- `pip-audit --skip-editable` against the project virtualenv
+- a clean package build
 
 The release gate also smokes the built wheel, unpacks the sdist and runs tests there, and scans tracked files plus build artifacts for private paths, bytecode, secret-like assignments, and accusation language.
 
